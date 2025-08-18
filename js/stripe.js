@@ -9,7 +9,17 @@ const stripe = Stripe(secrets.key);
 
 app.use(cors())
 
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Server is running' });
+});
+
 app.post('/create-checkout-session', async (req, res) => {
+  // For testing without a valid API key
+  if (secrets.key === 'sk_test_placeholder_key') {
+    res.json({ id: 'test_session_id', message: 'Test mode - no actual Stripe session created' });
+    return;
+  }
+  
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: [

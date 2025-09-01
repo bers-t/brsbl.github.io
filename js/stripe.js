@@ -10,26 +10,31 @@ const stripe = Stripe(secrets.key);
 app.use(cors())
 
 app.post('/create-checkout-session', async (req, res) => {
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    line_items: [
-      {
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: 'poetry book',
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'poetry book',
+            },
+            unit_amount: 5490,
           },
-          unit_amount: 5490,
+          quantity: 1,
         },
-        quantity: 1,
-      },
-    ],
-    mode: 'payment',
-    success_url: 'https://brsbl.com/pages/success.html',
-    cancel_url: 'https://brsbl.com/pages/book.html'
-  });
+      ],
+      mode: 'payment',
+      success_url: 'https://brsbl.com/pages/success.html',
+      cancel_url: 'https://brsbl.com/pages/book.html'
+    });
 
-  res.json({ id: session.id });
+    res.json({ id: session.id });
+  } catch (error) {
+    console.error('Stripe error:', error.message);
+    res.status(400).json({ error: error.message });
+  }
 });
 
 app.listen(4242, () => console.log(`Listening on port ${4242}!`));
